@@ -27,7 +27,10 @@ public class App {
         Scanner Scanner1 = new Scanner(System.in);
 
         do {
+
             try {
+                
+                
                 verMenu();
                 menu = Scanner1.next();
 
@@ -67,12 +70,15 @@ public class App {
 
                     default:
                         System.out.println("Introduiex un valor valid");
-                        break;
+                    break;
                 }
             } catch (InputMismatchException e) {
                 System.out.println("Introduiex un valor valid 32848235");
             }
         } while (!(menu.equals("i")));
+
+
+        Scanner1.close(); // TANQUEM SCANNER
     }
 
     // Menu Principal
