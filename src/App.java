@@ -9,7 +9,7 @@ public class App {
     }
 
     // metode per comprovar la conexio abans de començar el programa
-    public void conexioBD(){
+    public void conexioBD() {
         java.sql.Connection miConexion = ConexioBD.conectar();
 
         if (miConexion != null) {
@@ -21,16 +21,13 @@ public class App {
     }
 
     // metode principal
-    public void main1(){
+    public void main1() {
         String menu = "";
 
         Scanner Scanner1 = new Scanner(System.in);
 
         do {
-
             try {
-                
-                
                 verMenu();
                 menu = Scanner1.next();
 
@@ -38,49 +35,48 @@ public class App {
 
                     case "a":
                         opcioa();
-                    break;
-                
+                        break;
+
                     case "b":
                         opciob();
-                    break;
+                        break;
 
                     case "c":
                         opcioc();
-                    break;
+                        break;
 
                     case "e":
                         opcioe();
-                    break;
-                
+                        break;
+
                     case "f":
                         opciof();
-                    break;
+                        break;
 
                     case "g":
                         opciog();
-                    break;
+                        break;
 
                     case "h":
                         opcioh();
-                    break;
+                        break;
 
                     case "i":
                         System.out.println("Has sortir correctament");
-                    break;
+                        break;
 
                     default:
                         System.out.println("Introduiex un valor valid");
-                    break;
+                        break;
                 }
             } catch (InputMismatchException e) {
-                    System.out.println("Introduiex un valor valid");
+                System.out.println("Introduiex un valor valid 32848235");
             }
-
         } while (!(menu.equals("i")));
     }
 
     // Menu Principal
-    public void verMenu(){
+    public void verMenu() {
         System.out.println("----------MENU----------");
         System.out.println("a) Importació articles");
         System.out.println("b) Gestió d’articles -> (Sub-menú: Altes, baixes, mod., consultes)");
@@ -94,36 +90,35 @@ public class App {
         System.out.println("------------------------");
     }
 
-
     public static void opcioa() {
-        
+
     }
 
     public static void opciob() {
-        
+
     }
 
     public static void opcioc() {
-        
+
     }
 
     public static void opciod() {
-        
+
     }
 
     public static void opcioe() {
-        
+
     }
 
     public static void opciof() {
-        
+
     }
 
     public static void opciog() {
-        
+
     }
 
     public static void opcioh() {
-        
+
     }
 }
