@@ -27,9 +27,8 @@ public class App {
         Scanner Scanner1 = new Scanner(System.in);
 
         do {
-
+// articles, pantalo camisa. Tiquet, linea tiquet
             try {
-                
                 
                 verMenu();
                 menu = Scanner1.next();
@@ -69,7 +68,7 @@ public class App {
                     break;
 
                     default:
-                        System.out.println("Introduiex un valor valid");
+                        System.out.println("Introdueix un valor valid");
                     break;
                 }
             } catch (InputMismatchException e) {
@@ -77,6 +76,9 @@ public class App {
             }
 
         } while (!(menu.equals("i")));
+
+
+        Scanner1.close(); // TANQUEM SCANNER
     }
 
     // Menu Principal
