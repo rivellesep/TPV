@@ -81,8 +81,10 @@ public class App {
             } catch (InputMismatchException e) {
                 System.out.println("Introduiex un valor valid");
             }
-
         } while (!(menu.equals("i")));
+
+
+        Scanner1.close(); // TANQUEM SCANNER
     }
 
     // Menu Principal
@@ -104,13 +106,13 @@ public class App {
         Scanner sc2 = new Scanner(System.in);
         JSONParser parser = new JSONParser();
 
-        // 1. LEER EL ARCHIVO
-        System.out.println("\n--- Llegint l'arxiu articles.json ---");
-        try (FileReader reader = new FileReader("articles.json")) {
+        // llegir arxiu
+        System.out.println("\n--- Llegint l'arxiu Article.json ---");
+        try (FileReader reader = new FileReader("Article.json")) {
             // Transformamos el archivo en un array de objetos JSON
             JSONArray listaArticles = (JSONArray) parser.parse(reader);
 
-            // 2. CONTAR Y MOSTRAR
+            // contar i mostrar
             int camises = 0;
             int pantalons = 0;
 
@@ -146,19 +148,18 @@ public class App {
                         for (Object obj : listaArticles) {
                             JSONObject art = (JSONObject) obj;
 
-                            // Extraer los datos comunes (ojo con los castings de json-simple)
+                            // extreure el arxius comuns
                             int id = ((Long) art.get("id")).intValue();
                             String nom = (String) art.get("nom");
                             String familia = (String) art.get("familia");
 
-                            // Manejar si el precio viene como Long (ej: 25) o como Double (ej: 25.5)
                             double preuBase = (art.get("preu_base") instanceof Double) ? (Double) art.get("preu_base")
                                     : ((Long) art.get("preu_base")).doubleValue();
 
                             int iva = ((Long) art.get("iva")).intValue();
                             int stock = ((Long) art.get("stock")).intValue();
 
-                            // Comprobamos si el ID ya existe en la BD
+                            // comprobem si el ID existeix
                             boolean existeEnLaBD = false;
                             try (PreparedStatement psCheck = conn.prepareStatement(sqlCheck)) {
                                 psCheck.setInt(1, id);
@@ -170,7 +171,7 @@ public class App {
                             }
 
                             if (existeEnLaBD) {
-                                // 4. ACTUALIZAR (UPDATE)
+                                // actualitzar
                                 String sqlUpdate = "UPDATE articles SET nom=?, familia=?, preu_base=?, iva=?, stock=?, "
                                         + "talla_coll=?, amplada_pit=?, talla_cintura=?, llargada_camal=? WHERE id=?";
                                 try (PreparedStatement psUp = conn.prepareStatement(sqlUpdate)) {
@@ -180,8 +181,7 @@ public class App {
                                     psUp.setInt(4, iva);
                                     psUp.setInt(5, stock);
 
-                                    // Validar campos específicos de la camisa o pantalón para evitar fallar los
-                                    // CHECKs
+                                    // Validar camps
                                     if ("camisa".equalsIgnoreCase(familia)) {
                                         psUp.setInt(6, ((Long) art.get("talla_coll")).intValue());
                                         psUp.setInt(7, ((Long) art.get("amplada_pit")).intValue());
@@ -198,7 +198,7 @@ public class App {
                                     actualitzats++;
                                 }
                             } else {
-                                // 4. INSERTAR (INSERT)
+                                // insert
                                 String sqlInsert = "INSERT INTO articles (id, nom, familia, preu_base, iva, stock, "
                                         + "talla_coll, amplada_pit, talla_cintura, llargada_camal) VALUES (?,?,?,?,?,?,?,?,?,?)";
                                 try (PreparedStatement psIn = conn.prepareStatement(sqlInsert)) {
@@ -226,7 +226,7 @@ public class App {
                             }
                         }
 
-                        // MOSTRAR RESULTADOS FINALES
+                        // mostrar resultats finals
                         System.out.println("\n✅ Procés d'importació finalitzat.");
                         System.out.println("-> Articles afegits nous: " + afegits);
                         System.out.println("-> Articles actualitzats (reinicialitzats): " + actualitzats);
