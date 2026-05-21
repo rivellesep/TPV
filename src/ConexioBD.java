@@ -11,12 +11,11 @@ public class ConexioBD {
         Connection conexion = null;
         try {
             conexion = DriverManager.getConnection(URL, USER, PASSWORD);
-            System.out.println("Conexión establecida con la IP 26.33.215.70");
+            System.out.println("Conexión establecida con el servidor!");
         } catch (SQLException e) {
             System.out.println("Error al conectar: " + e.getMessage());
         }
         return conexion;
     }
-
     
 }

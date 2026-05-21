@@ -1,5 +1,12 @@
+import java.io.FileReader;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.InputMismatchException;
 import java.util.Scanner;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 public class App {
 
@@ -29,8 +36,7 @@ public class App {
         do {
 
             try {
-                
-                
+
                 verMenu();
                 menu = Scanner1.next();
 
@@ -70,10 +76,10 @@ public class App {
 
                     default:
                         System.out.println("Introduiex un valor valid");
-                    break;
+                        break;
                 }
             } catch (InputMismatchException e) {
-                System.out.println("Introduiex un valor valid 32848235");
+                System.out.println("Introduiex un valor valid");
             }
         } while (!(menu.equals("i")));
 
@@ -96,35 +102,173 @@ public class App {
         System.out.println("------------------------");
     }
 
-    public static void opcioa() {
+    public void opcioa() {
+        Scanner sc2 = new Scanner(System.in);
+        JSONParser parser = new JSONParser();
+
+        // llegir arxiu
+        System.out.println("\n--- Llegint l'arxiu Article.json ---");
+        try (FileReader reader = new FileReader("Article.json")) {
+            // Transformamos el archivo en un array de objetos JSON
+            JSONArray listaArticles = (JSONArray) parser.parse(reader);
+
+            // contar i mostrar
+            int camises = 0;
+            int pantalons = 0;
+
+            for (Object obj : listaArticles) {
+                JSONObject art = (JSONObject) obj;
+                String familia = (String) art.get("familia");
+                if ("camisa".equalsIgnoreCase(familia)) {
+                    camises++;
+                } else if ("pantaló".equalsIgnoreCase(familia) || "pantalo".equalsIgnoreCase(familia)) {
+                    pantalons++;
+                }
+            }
+
+            try {
+
+                System.out.println("Es van a carregar: " + camises + " camises i " + pantalons + " pantalons.");
+                System.out.print("Vols bolcar la informació a la base de dades? (S/N): ");
+                String resposta = sc2.nextLine();
+
+                if (resposta.equalsIgnoreCase("S")) {
+                    int afegits = 0;
+                    int actualitzats = 0;
+
+                    // 3. CONECTAR Y COMPROBAR ID
+                    try (Connection conn = ConexioBD.conectar()) {
+                        if (conn == null) {
+                            System.out.println("❌ No es pot connectar a la base de dades.");
+                            return;
+                        }
+
+                        String sqlCheck = "SELECT id FROM articles WHERE id = ?";
+
+                        for (Object obj : listaArticles) {
+                            JSONObject art = (JSONObject) obj;
+
+                            // extreure el arxius comuns
+                            int id = ((Long) art.get("id")).intValue();
+                            String nom = (String) art.get("nom");
+                            String familia = (String) art.get("familia");
+
+                            double preuBase = (art.get("preu_base") instanceof Double) ? (Double) art.get("preu_base")
+                                    : ((Long) art.get("preu_base")).doubleValue();
+
+                            int iva = ((Long) art.get("iva")).intValue();
+                            int stock = ((Long) art.get("stock")).intValue();
+
+                            // comprobem si el ID existeix
+                            boolean existeEnLaBD = false;
+                            try (PreparedStatement psCheck = conn.prepareStatement(sqlCheck)) {
+                                psCheck.setInt(1, id);
+                                try (ResultSet rs = psCheck.executeQuery()) {
+                                    if (rs.next()) {
+                                        existeEnLaBD = true;
+                                    }
+                                }
+                            }
+
+                            if (existeEnLaBD) {
+                                // actualitzar
+                                String sqlUpdate = "UPDATE articles SET nom=?, familia=?, preu_base=?, iva=?, stock=?, "
+                                        + "talla_coll=?, amplada_pit=?, talla_cintura=?, llargada_camal=? WHERE id=?";
+                                try (PreparedStatement psUp = conn.prepareStatement(sqlUpdate)) {
+                                    psUp.setString(1, nom);
+                                    psUp.setString(2, familia);
+                                    psUp.setDouble(3, preuBase);
+                                    psUp.setInt(4, iva);
+                                    psUp.setInt(5, stock);
+
+                                    // Validar camps
+                                    if ("camisa".equalsIgnoreCase(familia)) {
+                                        psUp.setInt(6, ((Long) art.get("talla_coll")).intValue());
+                                        psUp.setInt(7, ((Long) art.get("amplada_pit")).intValue());
+                                        psUp.setNull(8, java.sql.Types.INTEGER);
+                                        psUp.setNull(9, java.sql.Types.INTEGER);
+                                    } else {
+                                        psUp.setNull(6, java.sql.Types.INTEGER);
+                                        psUp.setNull(7, java.sql.Types.INTEGER);
+                                        psUp.setInt(8, ((Long) art.get("talla_cintura")).intValue());
+                                        psUp.setInt(9, ((Long) art.get("llargada_camal")).intValue());
+                                    }
+                                    psUp.setInt(10, id);
+                                    psUp.executeUpdate();
+                                    actualitzats++;
+                                }
+                            } else {
+                                // insert
+                                String sqlInsert = "INSERT INTO articles (id, nom, familia, preu_base, iva, stock, "
+                                        + "talla_coll, amplada_pit, talla_cintura, llargada_camal) VALUES (?,?,?,?,?,?,?,?,?,?)";
+                                try (PreparedStatement psIn = conn.prepareStatement(sqlInsert)) {
+                                    psIn.setInt(1, id);
+                                    psIn.setString(2, nom);
+                                    psIn.setString(3, familia);
+                                    psIn.setDouble(4, preuBase);
+                                    psIn.setInt(5, iva);
+                                    psIn.setInt(6, stock);
+
+                                    if ("camisa".equalsIgnoreCase(familia)) {
+                                        psIn.setInt(7, ((Long) art.get("talla_coll")).intValue());
+                                        psIn.setInt(8, ((Long) art.get("amplada_pit")).intValue());
+                                        psIn.setNull(9, java.sql.Types.INTEGER);
+                                        psIn.setNull(10, java.sql.Types.INTEGER);
+                                    } else {
+                                        psIn.setNull(7, java.sql.Types.INTEGER);
+                                        psIn.setNull(8, java.sql.Types.INTEGER);
+                                        psIn.setInt(9, ((Long) art.get("talla_cintura")).intValue());
+                                        psIn.setInt(10, ((Long) art.get("llargada_camal")).intValue());
+                                    }
+                                    psIn.executeUpdate();
+                                    afegits++;
+                                }
+                            }
+                        }
+
+                        // mostrar resultats finals
+                        System.out.println("\n✅ Procés d'importació finalitzat.");
+                        System.out.println("-> Articles afegits nous: " + afegits);
+                        System.out.println("-> Articles actualitzats (reinicialitzats): " + actualitzats);
+                    }
+                } else {
+                    System.out.println("❌ Importació cancel·lada.");
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("Error");
+            }
+
+        } catch (Exception e) {
+            System.out.println("❌ Error crític en processar el JSON: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    public void opciob() {
 
     }
 
-    public static void opciob() {
+    public void opcioc() {
 
     }
 
-    public static void opcioc() {
+    public void opciod() {
 
     }
 
-    public static void opciod() {
+    public void opcioe() {
 
     }
 
-    public static void opcioe() {
+    public void opciof() {
 
     }
 
-    public static void opciof() {
+    public void opciog() {
 
     }
 
-    public static void opciog() {
-
-    }
-
-    public static void opcioh() {
+    public void opcioh() {
 
     }
 }
