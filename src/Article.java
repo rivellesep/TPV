@@ -7,10 +7,16 @@ public class Article {
     private int iva;
     private int stock;
 
-    public Article(int id, String nom, String familia, double preu_base, int iva, int stock ){
+    public Article(int id, String nom, String familia, double preu_base, int iva, int stock){
+
+        setId(id);
+        setNom(nom);
+        setFamilia(familia);
+        setPreuBase(preu_base);
+        setIva(iva);
+        setStock(stock);
 
     }
-    //id , nom, familia, preu_base, iva, y stock
     
     // SETTER Y GETTER ID
     public void setId(int id){
