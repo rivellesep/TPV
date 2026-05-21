@@ -1,8 +1,15 @@
+import java.io.FileReader;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.InputMismatchException;
 import java.util.Scanner;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 public class App {
-
+    Scanner Scanner1 = new Scanner(System.in);
     public static void main(String[] args) {
         App p = new App();
         p.conexioBD();
@@ -24,13 +31,12 @@ public class App {
     public void main1() {
         String menu = "";
 
-        Scanner Scanner1 = new Scanner(System.in);
+        
 
         do {
 
             try {
-                
-                
+
                 verMenu();
                 menu = Scanner1.next();
 
@@ -70,10 +76,10 @@ public class App {
 
                     default:
                         System.out.println("Introduiex un valor valid");
-                    break;
+                        break;
                 }
             } catch (InputMismatchException e) {
-                System.out.println("Introduiex un valor valid 32848235");
+                System.out.println("Introduiex un valor valid");
             }
         } while (!(menu.equals("i")));
 
@@ -97,34 +103,69 @@ public class App {
     }
 
     public static void opcioa() {
+        System.out.println("\n--- Llegint l'arxiu Article.json ---");
+        
+        // Cridem a la classe separada per llegir el JSON
+        JSONArray listaArticles = GestioJSON.llegirArticles("Article.json");
+
+        if (listaArticles == null) {
+            return; // Si hi ha error, sortim
+        }
+
+        int camises = 0;
+        int pantalons = 0;
+
+        for (Object obj : listaArticles) {
+            org.json.simple.JSONObject art = (org.json.simple.JSONObject) obj;
+            String familia = (String) art.get("familia");
+            
+            if ("camisa".equalsIgnoreCase(familia)) {
+                camises++;
+            } else if ("pantaló".equalsIgnoreCase(familia) || "pantalo".equalsIgnoreCase(familia)) {
+                pantalons++;
+            }
+        }
+
+        System.out.println("Es van a carregar: " + camises + " camises i " + pantalons + " pantalons.");
+        
+        // creem un scanner local per no tindre problemas amb el principal
+        java.util.Scanner scanLocal = new java.util.Scanner(System.in);
+        System.out.print("Vols importar la informació a la base de dades? (S/N): ");
+        String resposta = scanLocal.next();
+
+        if (resposta.equalsIgnoreCase("S")) {
+            // Cridem a la classe separada de base de dades enviant-li l'array
+            GestioArticlesBD.processarArticles(listaArticles);
+        } else {
+            System.out.println("Importació cancel·lada...");
+        }
+    }
+
+    public void opciob() {
 
     }
 
-    public static void opciob() {
+    public void opcioc() {
 
     }
 
-    public static void opcioc() {
+    public void opciod() {
 
     }
 
-    public static void opciod() {
+    public void opcioe() {
 
     }
 
-    public static void opcioe() {
+    public void opciof() {
 
     }
 
-    public static void opciof() {
+    public void opciog() {
 
     }
 
-    public static void opciog() {
-
-    }
-
-    public static void opcioh() {
+    public void opcioh() {
 
     }
 }

@@ -4,13 +4,12 @@ import org.json.simple.parser.JSONParser;
 
 public class GestioJSON {
     
-    public static JSONArray llegirArticlesJSON(String rutaFitxer) {
+    public static JSONArray llegirArticles(String nomFitxer) {
         JSONParser parser = new JSONParser();
-        try {
-            Object obj = parser.parse(new FileReader(rutaFitxer));
-            return (JSONArray) obj;
+        try (FileReader reader = new FileReader(nomFitxer)) {
+            return (JSONArray) parser.parse(reader);
         } catch (Exception e) {
-            System.out.println("Error en llegir el JSON: " + e.getMessage());
+            System.out.println("Error al processar el JSON: " + e.getMessage());
             return null;
         }
     }
