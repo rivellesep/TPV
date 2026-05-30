@@ -83,7 +83,7 @@ public class App {
         } while (!(menu.equals("i")));
 
 
-        Scanner1.close(); // TANQUEM SCANNER
+        Scanner1.close();
     }
 
     // Menu Principal
@@ -104,11 +104,10 @@ public class App {
     public static void opcioa() {
         System.out.println("\n--- Llegint l'arxiu Article.json ---");
         
-        // Cridem a la classe separada per llegir el JSON
         JSONArray listaArticles = GestioJSON.llegirArticles("Article.json");
 
         if (listaArticles == null) {
-            return; // Si hi ha error, sortim
+            return; // si hi ha error surt
         }
 
         int camises = 0;
@@ -211,15 +210,94 @@ public class App {
     }
 
     public void opciod() {
+        System.out.println("\n--- TPV : NOVA VENDA ---");
+        System.out.print("Introdueix el DNI del client (000 si és genèric): ");
+        String dniClient = Scanner1.next();
 
+        if (!GestioVendesBD.existeixClient(dniClient)) {
+            System.out.println("Client no registrat. S'assignarà el client genèric '000'.");
+            dniClient = "000";
+        }
+
+        // agafem dade
+        String dataCompra = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+
+        // creem tiquet
+        tiquet nouTiquet = new tiquet(0, dataCompra, dniClient, 0.0, 0.0, 0.0);
+
+        int idArticle = -1;
+        
+        while (idArticle != 0) {
+            System.out.print("\nIntrodueix l'ID de l'article (0 per finalitzar venda): ");
+            idArticle = Scanner1.nextInt();
+
+            if (idArticle != 0) {
+                // recuperem dades 
+                double[] infoArticle = GestioVendesBD.obtenirInfoArticle(idArticle);
+                
+                if (infoArticle == null) {
+                    System.out.println("❌ L'article no existeix a la base de dades.");
+                } else {
+                    double preuBaseArticle = infoArticle[0];
+                    int ivaPercentatge = (int) infoArticle[1];
+                    int stockActual = (int) infoArticle[2];
+
+                    System.out.print("Quantitat: ");
+                    int quantitat = Scanner1.nextInt();
+
+                    if (quantitat > stockActual) {
+                        System.out.println("⚠️ No hi ha prou stock! Stock disponible d'aquest article: " + stockActual);
+                    } else if (quantitat > 0) {
+                        // calculs
+                        double preuBaseTotal = preuBaseArticle * quantitat;
+                        double ivaCalculat = preuBaseTotal * (ivaPercentatge / 100.0);
+                        double preuFinal = preuBaseTotal + ivaCalculat;
+
+                        lineaTiquet linia = new lineaTiquet(0, idArticle, quantitat, preuBaseTotal, ivaCalculat, preuFinal);
+                        nouTiquet.afegirLinia(linia);
+                        System.out.println("✅ Article afegit al tiquet correctament.");
+                    } else {
+                        System.out.println("⚠️ La quantitat ha de ser major que 0.");
+                    }
+                }
+            }
+        }
+
+        // Si el tiquet té alguna línia (preu > 0), el tanquem i l'enviem a la BD
+        if (nouTiquet.getTotalFinal() > 0) {
+            nouTiquet.imprimirTiquet();
+            
+            System.out.print("Confirmar venda i registrar a la Base de Dades? (S/N): ");
+            String confirmar = Scanner1.next();
+            if (confirmar.equalsIgnoreCase("S")) {
+                GestioVendesBD.registrarVenda(nouTiquet);
+            } else {
+                System.out.println("Venda cancel·lada. No s'ha descomptat stock.");
+            }
+        } else {
+            System.out.println("Tiquet buit. Tornant al menú principal...");
+        }
     }
 
     public void opcioe() {
-
+        System.out.println("\n--- CONSULTA DE VENDES PER CLIENT ---");
+        System.out.print("Introdueix el DNI del client: ");
+        String dni = Scanner1.next();
+        
+        GestioConsultesBD.vendesPerClient(dni);
     }
 
     public void opciof() {
-
+        System.out.println("\n--- CONSULTA DE VENDES PER ARTICLE ---");
+        System.out.print("Introdueix el codi de l'article: ");
+        
+        try {
+            int idArticle = Scanner1.nextInt();
+            GestioConsultesBD.vendesPerArticle(idArticle);
+        } catch (Exception e) {
+            System.out.println("Error: Has d'introduir un codi numèric.");
+            Scanner1.next(); // Netejar l'scanner
+        }
     }
 
     public void opciog() {
