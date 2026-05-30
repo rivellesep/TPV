@@ -176,7 +176,38 @@ public class App {
     }
 
     public void opcioc() {
+        String subMenu = "";
+        do {
+            System.out.println("\n--- GESTIÓ DE CLIENTS ---");
+            System.out.println("1) Alta de client");
+            System.out.println("2) Baixa de client");
+            System.out.println("3) Modificació de client");
+            System.out.println("4) Consulta de clients");
+            System.out.println("5) Tornar al menú principal");
+            System.out.print("Tria una opció: ");
+            subMenu = Scanner1.next();
 
+            switch (subMenu) {
+                case "1":
+                    GestioClientsBD.altaClient(Scanner1);
+                    break;
+                case "2":
+                    GestioClientsBD.baixaClient(Scanner1);
+                    break;
+                case "3":
+                    GestioClientsBD.modificarClient(Scanner1);
+                    break;
+                case "4":
+                    GestioClientsBD.consultarClients(Scanner1);
+                    break;
+                case "5":
+                    System.out.println("Tornant al menú principal...");
+                    break;
+                default:
+                    System.out.println("Opció no vàlida.");
+                    break;
+            }
+        } while (!subMenu.equals("5"));
     }
 
     public void opciod() {
