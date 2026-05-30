@@ -30,13 +30,8 @@ public class App {
     // metode principal
     public void main1() {
         String menu = "";
-
-        
-
         do {
-
             try {
-
                 verMenu();
                 menu = Scanner1.next();
 
@@ -52,6 +47,10 @@ public class App {
 
                     case "c":
                         opcioc();
+                        break;
+
+                    case "d":
+                        opciod();
                         break;
 
                     case "e":
@@ -142,7 +141,38 @@ public class App {
     }
 
     public void opciob() {
+        String subMenu = "";
+        do {
+            System.out.println("\n--- GESTIÓ D'ARTICLES ---");
+            System.out.println("1) Alta d'article");
+            System.out.println("2) Baixa d'article");
+            System.out.println("3) Modificació d'article");
+            System.out.println("4) Consulta d'articles");
+            System.out.println("5) Tornar al menú principal");
+            System.out.print("Tria una opció: ");
+            subMenu = Scanner1.next();
 
+            switch (subMenu) {
+                case "1":
+                    GestioArticlesBD.altaArticle(Scanner1);
+                    break;
+                case "2":
+                    GestioArticlesBD.baixaArticle(Scanner1);
+                    break;
+                case "3":
+                    GestioArticlesBD.modificarArticle(Scanner1);
+                    break;
+                case "4":
+                    GestioArticlesBD.consultarArticle(Scanner1);
+                    break;
+                case "5":
+                    System.out.println("Tornant al menú principal...");
+                    break;
+                default:
+                    System.out.println("Opció no vàlida.");
+                    break;
+            }
+        } while (!subMenu.equals("5"));
     }
 
     public void opcioc() {
