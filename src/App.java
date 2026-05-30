@@ -236,7 +236,7 @@ public class App {
                 double[] infoArticle = GestioVendesBD.obtenirInfoArticle(idArticle);
                 
                 if (infoArticle == null) {
-                    System.out.println("❌ L'article no existeix a la base de dades.");
+                    System.out.println("L'article no existeix a la base de dades.");
                 } else {
                     double preuBaseArticle = infoArticle[0];
                     int ivaPercentatge = (int) infoArticle[1];
@@ -246,7 +246,7 @@ public class App {
                     int quantitat = Scanner1.nextInt();
 
                     if (quantitat > stockActual) {
-                        System.out.println("⚠️ No hi ha prou stock! Stock disponible d'aquest article: " + stockActual);
+                        System.out.println("No hi ha prou stock! Stock disponible d'aquest article: " + stockActual);
                     } else if (quantitat > 0) {
                         // calculs
                         double preuBaseTotal = preuBaseArticle * quantitat;
@@ -255,9 +255,9 @@ public class App {
 
                         lineaTiquet linia = new lineaTiquet(0, idArticle, quantitat, preuBaseTotal, ivaCalculat, preuFinal);
                         nouTiquet.afegirLinia(linia);
-                        System.out.println("✅ Article afegit al tiquet correctament.");
+                        System.out.println("Article afegit al tiquet correctament.");
                     } else {
-                        System.out.println("⚠️ La quantitat ha de ser major que 0.");
+                        System.out.println("La quantitat ha de ser major que 0.");
                     }
                 }
             }
@@ -296,15 +296,25 @@ public class App {
             GestioConsultesBD.vendesPerArticle(idArticle);
         } catch (Exception e) {
             System.out.println("Error: Has d'introduir un codi numèric.");
-            Scanner1.next(); // Netejar l'scanner
+            Scanner1.next();
         }
     }
 
     public void opciog() {
-
+        System.out.println("\n--- CÀLCUL DE BENEFICIS ---");
+        System.out.print("Vols veure l'informe en ordre ascendent (A) o descendent (D) de beneficis? ");
+        String ordre = Scanner1.next();
+        
+        boolean ascendent = ordre.equalsIgnoreCase("A");
+        GestioConsultesBD.calculBeneficis(ascendent);
     }
 
     public void opcioh() {
-
+        System.out.println("\n--- RECOMPRA AUTOMÀTICA D'ARTICLES ---");
+        System.out.print("Introdueix el llindar d'stock mínim: ");
+        int llindar = Scanner1.nextInt();
+        
+        // Cridem al mètode que gestionarà la proposta a la base de dades
+        GestioArticlesBD.propostaRecompra(llindar, Scanner1);
     }
 }

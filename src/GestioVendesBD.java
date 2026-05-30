@@ -88,10 +88,10 @@ public class GestioVendesBD {
             }
 
             conn.commit();
-            System.out.println("✅ Venda guardada correctament a la base de dades! (ID Tiquet: " + idTiquet + ")");
+            System.out.println("Venda guardada correctament a la base de dades! (ID Tiquet: " + idTiquet + ")");
 
         } catch (Exception e) {
-            System.out.println("❌ Error crític al registrar la venda: " + e.getMessage());
+            System.out.println("Error crític al registrar la venda: " + e.getMessage());
             if (conn != null) {
                 try {
                     conn.rollback();

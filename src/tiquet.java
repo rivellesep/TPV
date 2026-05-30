@@ -115,5 +115,7 @@ public class tiquet {
         return totalFinal;
     }
 
-    
+    public List<lineaTiquet> getLinies() {
+        return this.linies;
+    }
 }

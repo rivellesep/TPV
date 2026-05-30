@@ -212,4 +212,78 @@ public class GestioArticlesBD {
             System.out.println("Error al consultar: " + e.getMessage());
         }
     }
+
+    // 5. RECOMPRA AUTOMATICA
+    public static void propostaRecompra(int llindar, java.util.Scanner sc) {
+        String sqlSelect = "SELECT id, nom, stock FROM articles WHERE stock < ?";
+        String sqlUpdate = "UPDATE articles SET stock = stock + ? WHERE id = ?";
+        
+        org.json.simple.JSONArray llistaCompraJSON = new org.json.simple.JSONArray();
+        java.util.List<int[]> articlesAComprar = new java.util.ArrayList<>();
+        
+        try (Connection conn = ConexioBD.conectar();
+             PreparedStatement ps = conn.prepareStatement(sqlSelect)) {
+            
+            ps.setInt(1, llindar);
+            ResultSet rs = ps.executeQuery();
+            
+            System.out.println("\n--- PROPOSTA DE COMPRA AL MAJORISTA ---");
+            boolean calComprar = false;
+            
+            while (rs.next()) {
+                calComprar = true;
+                int id = rs.getInt("id");
+                String nom = rs.getString("nom");
+                int stockActual = rs.getInt("stock");
+                
+                // calculem la quantitat a comprar: cobrim el llindar i afegim 20 d'extra
+                int quantitatAComprar = (llindar - stockActual) + 20;
+                
+                System.out.printf("- Codi: %d | Article: %s | Stock actual: %d -> Es demanaran %d unitats.\n", 
+                                  id, nom, stockActual, quantitatAComprar);
+                
+                // guardem les dades per si es confirma la compra
+                articlesAComprar.add(new int[]{id, quantitatAComprar});
+                
+                // preparem l'objecte pel JSON
+                org.json.simple.JSONObject obj = new org.json.simple.JSONObject();
+                obj.put("codi_article", id);
+                obj.put("nom_article", nom);
+                obj.put("quantitat", quantitatAComprar);
+                llistaCompraJSON.add(obj);
+            }
+            
+            if (!calComprar) {
+                System.out.println("Tots els articles tenen un stock saludable per sobre de " + llindar + ". No cal fer comanda.");
+                return;
+            }
+            
+            System.out.print("\nVols confirmar aquesta comanda i actualitzar l'stock? (S/N): ");
+            String confirmacio = sc.next();
+            
+            if (confirmacio.equalsIgnoreCase("S")) {
+                // 1. Crear i escriure el fitxer JSON
+                try (java.io.FileWriter file = new java.io.FileWriter("comanda_majorista.json")) {
+                    file.write(llistaCompraJSON.toJSONString());
+                    file.flush();
+                    System.out.println("✅ Fitxer 'comanda_majorista.json' creat correctament a l'arrel del projecte.");
+                }
+                
+                // 2. Actualitzar els nous stocks a la Base de Dades
+                try (PreparedStatement psUp = conn.prepareStatement(sqlUpdate)) {
+                    for (int[] art : articlesAComprar) {
+                        psUp.setInt(1, art[1]); // quantitat a sumar
+                        psUp.setInt(2, art[0]); // id de l'article
+                        psUp.executeUpdate();
+                    }
+                    System.out.println("✅ Stock dels articles actualitzat correctament a la base de dades.");
+                }
+            } else {
+                System.out.println("Comanda cancel·lada. L'stock no s'ha modificat.");
+            }
+            
+        } catch (Exception e) {
+            System.out.println("Error durant la recompra: " + e.getMessage());
+        }
+    }
 }
